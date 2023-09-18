@@ -2,6 +2,7 @@ require("dotenv").config();
 
 const express = require("express");
 const mongoose = require("mongoose");
+mongoose.set("strictQuery", false);
 const mongodbConnString = process.env.MONGODB_URI;
 
 const app = express();
@@ -11,17 +12,14 @@ app.use(express.json());
 
 // mongodb connection
 
-mongoose.connect(mongodbConnString);
+main().catch((err) => console.log(err));
 
-const db = mongoose.connection;
+async function main() {
+  await mongoose.connect(mongodbConnString);
+  console.log("Connected to MongoDB");
+}
 
-db.on("error", (err) => {
-  console.error(err);
-});
-
-db.once("connected", () => {
-  console.log(`Database connected`);
-});
+// end mongoDB connection
 
 const apiRoutes = require("./routes/index");
 
