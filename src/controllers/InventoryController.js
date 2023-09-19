@@ -122,8 +122,7 @@ const createItem = async (req, res) => {
 
   if (!name || !category) {
     return res.status(400).json({
-      error:
-        "Name, category and description are needed for creating an new item.",
+      error: "Name, category are needed for creating an new item.",
     });
   }
 
@@ -144,6 +143,7 @@ const createItem = async (req, res) => {
       const item = new Items({
         name,
         category,
+        description,
         price,
         in_stock,
         images,
@@ -183,7 +183,46 @@ const deleteItem = async (req, res) => {
 };
 
 // to implement
-const updateItem = async (req, res) => {};
+const updateItem = async (req, res) => {
+  const id = req.params.id;
+
+  if (!id) {
+    return res.status(400).json("Enter valid id.");
+  }
+
+  const { name, description, category, in_stock, price, images } = req.body;
+
+  if (!name || !category) {
+    return res.status(400).json({
+      error: "Name, category are needed for creating an new item.",
+    });
+  }
+
+  if (!Array.isArray(images)) {
+    return res
+      .json(400)
+      .json({ error: "Images must be an array of URL images." });
+  }
+
+  try {
+    const checkIfCategoryExists = await Category.findOne({ _id: category });
+
+    if (!checkIfCategoryExists) {
+      return res.status(400).json({ error: "The category does not exist." });
+    } else {
+      const updatedData = req.body;
+      const options = { new: true };
+
+      const result = await Items.findByIdAndUpdate(id, updatedData, options);
+
+      res.status(200).json(result);
+    }
+  } catch (err) {
+    console.error(err);
+
+    res.status(500).json({ error: err.message });
+  }
+};
 
 module.exports = {
   getAllCategories,
